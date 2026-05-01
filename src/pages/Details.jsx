@@ -7,6 +7,7 @@ function Details() {
   const { data, loading, error } = useFetch(`http://localhost:5000/items/${id}`)
   const navigate = useNavigate()
   
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -55,6 +56,7 @@ function Details() {
       if (response.ok) {
         setUpdateMessage('Item updated successfully!')
         setTimeout(() => {
+          setIsEditModalOpen(false)
           navigate('/home')
         }, 1500)
       } else {
@@ -65,6 +67,16 @@ function Details() {
     } finally {
       setUpdating(false)
     }
+  }
+
+  const openEditModal = () => {
+    setUpdateMessage('')
+    setIsEditModalOpen(true)
+  }
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false)
+    setUpdateMessage('')
   }
 
   if (loading) return (
@@ -89,6 +101,7 @@ function Details() {
           ← Back to Items
         </button>
 
+        {/* Read-only Details Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header Section */}
           <div className="bg-blue-500 text-white px-8 py-6">
@@ -96,56 +109,30 @@ function Details() {
             <p className="text-blue-100 mt-2">ID: {id}</p>
           </div>
 
-          {/* Form Section */}
-          <form onSubmit={handleUpdate} className="p-8 space-y-6">
+          {/* Content Section */}
+          <div className="p-8 space-y-6">
             {/* Item Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-600 mb-2">
                 Item Name
               </label>
-              <input
-                id="name"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter item name"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-              />
+              <p className="text-xl font-semibold text-slate-900">{data?.name}</p>
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-600 mb-2">
                 Description
               </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Enter item description"
-                rows="4"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 resize-none"
-              />
+              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{data?.description}</p>
             </div>
 
             {/* Price */}
             <div>
-              <label htmlFor="price" className="block text-sm font-semibold text-slate-700 mb-2">
-                Price ($)
+              <label className="block text-sm font-semibold text-slate-600 mb-2">
+                Price
               </label>
-              <input
-                id="price"
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="Enter item price"
-                step="0.01"
-                min="0"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-              />
+              <p className="text-3xl font-bold text-blue-600">${data?.price?.toFixed(2)}</p>
             </div>
 
             {/* Additional Info (Read-only) */}
@@ -180,37 +167,119 @@ function Details() {
               </div>
             )}
 
-            {/* Status Message */}
-            {updateMessage && (
-              <div className={`p-4 rounded-lg font-semibold ${
-                updateMessage.includes('successfully') 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-red-100 text-red-700'
-              }`}>
-                {updateMessage}
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
               <button
-                type="submit"
-                disabled={updating}
-                className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+                onClick={openEditModal}
+                className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
               >
-                {updating ? 'Updating...' : 'Update Item'}
+                Update
               </button>
               <button
-                type="button"
                 onClick={() => navigate('/home')}
                 className="flex-1 bg-slate-300 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-400 transition-colors"
               >
-                Cancel
+                Back
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 py-10 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-2xl w-full">
+            {/* Modal Header */}
+            <div className="bg-blue-500 text-white px-8 py-6">
+              <h2 className="text-2xl font-bold">Update Item</h2>
+            </div>
+
+            {/* Modal Content */}
+            <form onSubmit={handleUpdate} className="p-8 space-y-6">
+              {/* Item Name */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Item Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter item name"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Enter item description"
+                  rows="4"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 resize-none"
+                />
+              </div>
+
+              {/* Price */}
+              <div>
+                <label htmlFor="price" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Price ($)
+                </label>
+                <input
+                  id="price"
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="Enter item price"
+                  step="0.01"
+                  min="0"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              {/* Status Message */}
+              {updateMessage && (
+                <div className={`p-4 rounded-lg font-semibold ${
+                  updateMessage.includes('successfully') 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  {updateMessage}
+                </div>
+              )}
+
+              {/* Modal Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+                >
+                  {updating ? 'Updating...' : 'Update'}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  disabled={updating}
+                  className="flex-1 bg-slate-300 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-400 transition-colors disabled:bg-slate-200 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
