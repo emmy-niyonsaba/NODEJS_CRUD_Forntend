@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 function Home() {
   const { data, loading, error } = useFetch('http://localhost:5000/items/')
   const navigate = useNavigate()
-  console.log(data)
+  
 
   if (loading) return (
     <div className="min-h-screen bg-blue-500 px-4 py-10 flex items-center justify-center">
