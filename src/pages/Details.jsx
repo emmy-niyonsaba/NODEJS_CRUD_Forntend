@@ -1,6 +1,7 @@
 import { useFetch } from "../hooks/fetch.js"
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
+import axios from "axios"
 
 function Details() {
   const { id } = useParams()
@@ -102,6 +103,7 @@ function Details() {
         </button>
 
         {/* Read-only Details Card */}
+        
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header Section */}
           <div className="bg-blue-500 text-white px-8 py-6">
